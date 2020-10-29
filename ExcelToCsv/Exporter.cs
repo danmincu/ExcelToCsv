@@ -2,7 +2,9 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using Jitbit.Utils;
 using System;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace ExcelToCsv
 {
@@ -103,25 +105,13 @@ namespace ExcelToCsv
             }
             else
             {
-                if (decimal.TryParse(theCell.CellValue.Text, out var dd))
+                if (decimal.TryParse(theCell.CellValue?.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var dd))
                 {
-                    value = dd.ToString("F99").TrimEnd('0');
+                    value = dd.ToString("F99").TrimEnd('0').TrimEnd('.');
                 }
                 else
                 {
-                    if (theCell.CellValue.Text.ToUpper().Contains("E-"))
-                    {
-                        try
-                        {
-                            // 5.3651762733430766E-2
-                            value = decimal.Parse(theCell.CellValue.Text, System.Globalization.NumberStyles.Float).ToString("F99").TrimEnd('0');
-                        }
-                        catch
-                        {
-                            value = theCell.CellValue.Text;
-                        }
-                    }
-
+                    value = theCell.CellValue?.Text ?? "";
                 }
                 /*  THIS SECTION CAN BE USED IF WE WANT TO PRESERVE NUMBER FORMATS
                 var cellFormats = wbPart.WorkbookStylesPart.Stylesheet.CellFormats;
@@ -146,7 +136,6 @@ namespace ExcelToCsv
                      }
                  }
 
-
                  int dateInteger = 0;
                  if (!string.IsNullOrEmpty(value.ToString()) && int.TryParse(value.ToString(), out dateInteger) && attrib.Count >= 1 && (dateTypes.Contains(attrib[1].Value) || isDate)) 
                  {
@@ -154,6 +143,12 @@ namespace ExcelToCsv
                  }
                  */
             }
+
+            //if (theCell.CellValue != null && value != theCell.CellValue.InnerText)
+            //{
+            //    Console.WriteLine($"{theCell.CellReference} {value} {theCell.CellValue.InnerText}");
+            //}
+
             return value;
 
         }
