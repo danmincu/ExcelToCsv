@@ -1,7 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Jitbit.Utils;
 using System;
-using System.Configuration;
 using System.Linq;
 
 namespace ExcelToCsv
@@ -19,7 +19,7 @@ namespace ExcelToCsv
             this.startFromLine = startFromLine;
             this.sheetName = sheetName;
             this.csvFileName = csvFileName;
-            dateTypes = ConfigurationManager.AppSettings["dateTypes"].Split(',');
+            dateTypes = "76,75,611,108,109,685,779,615".Split(',');
         }
 
         public void Export()
@@ -28,27 +28,24 @@ namespace ExcelToCsv
             {
                 var wbPart = document.WorkbookPart;
 
-                var theSheet = wbPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => s.Name.ToString().Equals(this.sheetName, StringComparison.OrdinalIgnoreCase));
+                var theSheet = wbPart.Workbook.Descendants<Sheet>().FirstOrDefault(s => String.IsNullOrEmpty(this.sheetName)
+                || s.Name.ToString().Equals(this.sheetName, StringComparison.OrdinalIgnoreCase));
                 var wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id));
                 var theRows = wsPart.Worksheet.Descendants<Row>();
-                var meaninfulRows = theRows.Skip(this.startFromLine - 1).ToList();
-                foreach (var row in meaninfulRows)
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(this.csvFileName))
                 {
-                    var cells = row.Descendants<Cell>().ToList();
-                    Console.WriteLine("");
-                    foreach (var item in cells)
+                    foreach (var row in theRows.Skip(this.startFromLine - 1))
                     {
-                        var text = GetCellValue(item, wbPart).ToString().Trim().Replace("\n", " ");
-
-                        Console.Write(text + ",");
+                        var cells = row.Descendants<Cell>();
+                        var line = string.Join(",", cells.Select(c =>
+                         CsvExport.MakeValueCsvFriendly(GetCellValue(c, wbPart).ToString().Trim())));
+                        file.WriteLine(line);
                     }
-                    Console.WriteLine("");
                 }
             }
         }
 
-
-
+        // TODO - test this with a large number of samples
         private static object GetCellValue(Cell theCell, WorkbookPart wbPart)
         {
             var attrib = theCell.GetAttributes();

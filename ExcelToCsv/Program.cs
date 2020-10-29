@@ -32,7 +32,6 @@ namespace ExcelToCsv
                     exporter.Export();
                 });
             }
-            Console.ReadLine();
         }
     }
 }
