@@ -107,34 +107,51 @@ namespace ExcelToCsv
             }
             else
             {
-                const int EXCEL_TRUNCATE_DIGITS_COUNT = 15;
+                //const int EXCEL_TRUNCATE_DIGITS_COUNT = 15;
 
-                if (decimal.TryParse(theCell.CellValue?.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var dd))
+                if (double.TryParse(theCell.CellValue?.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var dd))
                 {
-                    var stringValue = dd.ToString("F99").TrimEnd('0').TrimEnd('.');
-                    string pattern = @"(-?0\.0*)([1-9]\d*)";
-                    var matches = Regex.Matches(stringValue, pattern);
+                    value = dd.ToString("F99").TrimEnd('0').TrimEnd('.');
+                    //var stringValue = dd.ToString("F99").TrimEnd('0').TrimEnd('.');
+                    //string pattern = @"(-?0\.0*)([1-9]\d*)";
+                    //var matches = Regex.Matches(stringValue, pattern);
 
-                    // THE FOLLOWING BLOCK INSURES THAT EXCEPT THE TRAILING + - SIGN AND PREFIX ZEROS THERE ARE NO MORE THAN 15 DIGITS.
-                    // IF MORE THE LAST DIGITS EXCEEDING 15 ARE ROUNDED IN THE 15th VALUE
-                    /*
-                     *     Input 0.0000759497104417289 
-                     *     Group 0.   0.0000759497104417289 
-                           Group 1.	  0.0000
-                           Group 2.	        759497104417289
-                     */
-                    if (matches.Count > 0 && matches[0].Success && matches[0].Groups.Count == 3 && matches[0].Groups[2].Value.Length > EXCEL_TRUNCATE_DIGITS_COUNT)
-                    {
-                        var zeroes = matches[0].Groups[1].Value;
-                        var remaining = matches[0].Groups[2].Value;
-                        var suffix = remaining.Substring(0, EXCEL_TRUNCATE_DIGITS_COUNT - 1);
-                        var prefix = remaining.Substring(EXCEL_TRUNCATE_DIGITS_COUNT - 1, remaining.Length - EXCEL_TRUNCATE_DIGITS_COUNT + 1);
-                        var compose = prefix[0] + "." + prefix.Substring(1, prefix.Length - 1);
-                        var rounded = (int)Math.Round(double.Parse(compose, CultureInfo.InvariantCulture));
-                        value = zeroes + suffix + rounded.ToString(CultureInfo.InvariantCulture);
-                    }
-                    else
-                      value = stringValue;
+                    //// THE FOLLOWING BLOCK INSURES THAT EXCEPT THE TRAILING + - SIGN AND PREFIX ZEROS THERE ARE NO MORE THAN 15 DIGITS.
+                    //// IF MORE THE LAST DIGITS EXCEEDING 15 ARE ROUNDED IN THE 15th VALUE
+                    ///*
+                    // *     Input 0.0000759497104417289 
+                    // *     Group 0.   0.0000759497104417289 
+                    //       Group 1.	  0.0000
+                    //       Group 2.	        759497104417289
+                    // */
+                    //if (matches.Count > 0 && matches[0].Success && matches[0].Groups.Count == 3 && matches[0].Groups[2].Value.Length > EXCEL_TRUNCATE_DIGITS_COUNT)
+                    //{
+                    //    var zeroes = matches[0].Groups[1].Value;
+                    //    var remaining = matches[0].Groups[2].Value;
+                    //    var suffix = remaining.Substring(0, EXCEL_TRUNCATE_DIGITS_COUNT - 1);
+                    //    var prefix = remaining.Substring(EXCEL_TRUNCATE_DIGITS_COUNT - 1, remaining.Length - EXCEL_TRUNCATE_DIGITS_COUNT + 1);
+                    //    var compose = prefix[0] + "." + prefix.Substring(1, prefix.Length - 1);
+                    //    var rounded = (int)Math.Round(double.Parse(compose, CultureInfo.InvariantCulture));
+                    //    value = zeroes + suffix + rounded.ToString(CultureInfo.InvariantCulture);
+                    //}
+                    //else
+                    //{
+                    //    pattern = @"(-?[1-9]?\d*\.)(\d*)";
+                    //    matches = Regex.Matches(stringValue, pattern);
+                    //    if (matches.Count > 0 && matches[0].Success && matches[0].Groups.Count == 3)
+                    //    {
+                    //        var firstDigits = matches[0].Groups[1].Value;
+                    //        var remaining = matches[0].Groups[2].Value;
+                    //        var digitsCount = EXCEL_TRUNCATE_DIGITS_COUNT - firstDigits.Count(c => c != '-' || c != '.');
+                    //        var suffix = remaining.Substring(0, digitsCount - 1);
+                    //        var prefix = remaining.Substring(digitsCount - 1, remaining.Length - digitsCount + 1);
+                    //        var compose = prefix[0] + "." + prefix.Substring(1, prefix.Length - 1);
+                    //        var rounded = (int)Math.Round(double.Parse(compose, CultureInfo.InvariantCulture));
+                    //        value = firstDigits + suffix + rounded.ToString(CultureInfo.InvariantCulture);
+                    //    }
+                    //    else
+                    //       value = stringValue;
+                    //}
                 }
                 else
                 {
